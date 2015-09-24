@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  get '/maze/random', to: 'maze#random'
+  get '/mazes/random', to: 'mazes#random'
 end
