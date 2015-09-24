@@ -1,5 +1,5 @@
 class Cell
-  attr_accessor :unvisited, :wall, :open
+  attr_accessor :unvisited, :wall, :open, :start, :end
 
   def initialize
     @unvisited = [:up, :down, :left, :right]
@@ -32,6 +32,9 @@ class Cell
   end
 
   def to_hash
-    {unvisited: unvisited, open: open, wall: wall}
+    hash = {unvisited: unvisited, open: open, wall: wall}
+    hash.merge!(start: true) if self.start
+    hash.merge!(end: true) if self.end
+    hash
   end
 end

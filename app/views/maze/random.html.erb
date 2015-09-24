@@ -132,7 +132,15 @@
                         column.map(function (cell) {
                             var wallClasses = cell.wall.join(' ');
                             var solutionClass = cell.solution ? 'solution' : '';
-                            return m("div", {class: 'wall ' + wallClasses + ' ' + solutionClass});
+                            var startClass = cell.start ? 'start' : '';
+                            var endClass = cell.end ? 'end' : '';
+                            return m("div", {
+                                class: 'wall ' +
+                                wallClasses + ' ' +
+                                solutionClass + ' ' +
+                                startClass + ' ' +
+                                endClass
+                            });
                         })
                     ]);
                 })

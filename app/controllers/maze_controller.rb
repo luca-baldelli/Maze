@@ -3,7 +3,7 @@ class MazeController < ApplicationController
     respond_to do |format|
       format.html { render :random }
       format.json do
-        @maze = Maze.new size: 10
+        @maze = Maze.new size: 30
         render json: @maze.to_json
       end
     end

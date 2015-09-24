@@ -10,6 +10,14 @@
     background-color: lightgreen;
   }
 
+  & .start {
+    background-color: red;
+  }
+
+  & .end {
+    background-color: blue;
+  }
+
   & .wall {
     width: 20px;
     height: 20px;

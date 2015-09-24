@@ -8,6 +8,8 @@ class Maze
     @cells = Matrix[*raw_matrix]
     @size = size
 
+    @cells[0, 0].start = true
+    @cells[size-1, size-1].end = true
     setup_boundaries
     path_builder.new(self).build
   end
