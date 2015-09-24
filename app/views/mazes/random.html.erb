@@ -1,20 +1,16 @@
 <div id="maze"></div>
 <script>
     var Maze = {
-        random: function () {
-            return m.request({method: "GET", url: "random.json"});
+        random: function (size) {
+            return m.request({method: "GET", url: "random.json?size=" + size});
         }
     };
+
     var PathFinder = {
         isVisited: function (cell, maze) {
             if (cell[0] < 0 || cell[0] >= maze.length || cell[1] < 0 || cell[1] >= maze.length) {
                 return true;
             }
-//            for (var i = 0; i < path.length; i++) {
-//                if (cell[0] == path[i][0] && cell[1] == path[i][1]) {
-//                    return true;
-//                }
-//            }
             return maze[cell[0]][cell[1]].visited === true;
         },
         neighbour: function (currentRow, currentColumn, direction) {
@@ -97,55 +93,60 @@
                     currentRow = fork[0];
                     currentColumn = fork[1];
                 }
-
             }
-//            for (var i = 0; i < maze.length; i++) {
-//                for (var j = 0; j < maze[i].length; j++) {
-//                    maze[i][j].solution = true;
-//                }
-//            }
         }
     };
 
     var MazeApp = {
         controller: function () {
-            var maze = Maze.random();
+            var mazeSize = m.prop(20);
+            var maze = m.prop(Maze.random(mazeSize()));
+
             return {
                 maze: maze,
+                mazeSize: mazeSize,
+                generate: function (size) {
+                    Maze.random(size).then(function (response) {
+                        maze(response);
+                    });
+                },
                 findPath: function () {
-
+                    PathFinder.findPath(maze());
                 }
             }
         },
 
         //view
         view: function (ctrl) {
-            var maze = ctrl.maze();
-            PathFinder.findPath(maze);
-
-            return m("div.maze", [
-                ctrl.maze().map(function (column) {
-                    return m(".column", [
-                        column.map(function (cell) {
-                            var wallClasses = cell.wall.join(' ');
-                            var solutionClass = cell.solution ? 'solution' : '';
-                            var startClass = cell.start ? 'start' : '';
-                            var endClass = cell.end ? 'end' : '';
-                            return m("div", {
-                                class: 'wall ' +
-                                wallClasses + ' ' +
-                                solutionClass + ' ' +
-                                startClass + ' ' +
-                                endClass
-                            });
-                        })
-                    ]);
-                })
+            var maze = ctrl.maze;
+            var mazeSize = ctrl.mazeSize;
+            console.log(maze());
+            return m("div", [
+                m("input", {onchange: m.withAttr("value", mazeSize), value: mazeSize()}),
+                m("button", {onclick: ctrl.generate.bind(ctrl, mazeSize())}, "Generate"),
+                m("button", {onclick: ctrl.findPath}, "Find Path"),
+                m("div.maze", [
+                    maze().map(function (column) {
+                        return m(".column", [
+                            column.map(function (cell) {
+                                var wallClasses = cell.wall.join(' ');
+                                var solutionClass = cell.solution ? 'solution' : '';
+                                var startClass = cell.start ? 'start' : '';
+                                var endClass = cell.end ? 'end' : '';
+                                return m("div", {
+                                    class: 'wall ' +
+                                    wallClasses + ' ' +
+                                    solutionClass + ' ' +
+                                    startClass + ' ' +
+                                    endClass
+                                });
+                            })
+                        ]);
+                    })
+                ])
             ]);
         }
     };
 
-
-    //initialize
     m.mount(document.getElementById("maze"), MazeApp);
 </script>
