@@ -1,0 +1,34 @@
+// Place all the styles related to the Maze controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.maze {
+  display: flex;
+  flex-wrap: wrap;
+
+  & .solution {
+    background-color: lightgreen;
+  }
+
+  & .wall {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+
+    &.up {
+      border-top: 3px solid black;
+    }
+
+    &.down {
+      border-bottom: 3px solid black;
+    }
+
+    &.right {
+      border-right: 3px solid black;
+    }
+
+    &.left {
+      border-left: 3px solid black;
+    }
+  }
+}
