@@ -5,72 +5,76 @@ var Maze = {
 };
 
 var PathFinder = {
-    isVisited: function (cell, maze) {
-        if (cell[0] < 0 || cell[0] >= maze.length || cell[1] < 0 || cell[1] >= maze.length) {
+    cell: function (maze, coordinates) {
+        return maze[coordinates[0]][coordinates[1]];
+    },
+    isVisited: function (coordinates, maze) {
+        if (coordinates[0] < 0 || coordinates[0] >= maze.length || coordinates[1] < 0 || coordinates[1] >= maze.length) {
             return true;
         }
-        return maze[cell[0]][cell[1]].visited === true;
+        return PathFinder.cell(maze, coordinates).visited === true;
     },
-    moveTo: function (row, column, maze, path) {
-        path.push([row, column]);
-        maze[row][column].visited = true;
-        maze[row][column].solution = true;
+    moveTo: function (coordinates, maze, path) {
+        path.push(coordinates);
+        PathFinder.cell(maze, coordinates).visited = true;
+        PathFinder.cell(maze, coordinates).solution = true;
     },
-    neighbour: function (cell, direction) {
-        var row = cell[0];
-        var column = cell[1];
-        if (direction === 'up') { column -= 1; } else
-        if (direction === 'down') { column += 1; } else
-        if (direction === 'left') { row -= 1; } else
-        if (direction === 'right') { row += 1; }
+    neighbour: function (coordinates, direction) {
+        var row = coordinates[0];
+        var column = coordinates[1];
+        if (direction === 'up') {
+            column -= 1;
+        } else if (direction === 'down') {
+            column += 1;
+        } else if (direction === 'left') {
+            row -= 1;
+        } else if (direction === 'right') {
+            row += 1;
+        }
 
         return [row, column];
     },
-    unexploredDirections: function (directions, currentRow, currentColumn, maze) {
+    unexploredDirections: function (directions, coordinates, maze) {
         var unexploredDirections = [];
 
         for (var i = 0; i < directions.length; i++) {
-            if (!PathFinder.isVisited(PathFinder.neighbour([currentRow, currentColumn], directions[i]), maze)) {
+            if (!PathFinder.isVisited(PathFinder.neighbour(coordinates, directions[i]), maze)) {
                 unexploredDirections.push(directions[i]);
             }
         }
 
         return unexploredDirections;
     },
-    randomDirection: function (availableDirections, currentRow, currentColumn, maze) {
-        var unexploredDirections = PathFinder.unexploredDirections(availableDirections, currentRow, currentColumn, maze);
+    randomDirection: function (coordinates, availableDirections, maze) {
+        var unexploredDirections = PathFinder.unexploredDirections(availableDirections, coordinates, maze);
         return unexploredDirections[Math.floor(Math.random() * unexploredDirections.length)];
     },
     backToFork: function (path, maze) {
         var i;
         for (i = path.length - 1; i >= 0; i--) {
-            if (PathFinder.unexploredDirections(['up', 'down', 'left', 'right'], path[i][0], path[i][1], maze).length > 0) {
+            if (PathFinder.unexploredDirections(['up', 'down', 'left', 'right'], path[i], maze).length > 0) {
                 break;
             } else {
-                maze[path[i][0]][path[i][1]].solution = false;
+                PathFinder.cell(maze, path[i]).solution = false;
             }
         }
         path.slice(0, i + 1);
-        return [path[i][0], path[i][1]];
+        return path[i];
     },
     findPath: function (maze) {
-        var currentRow = 0;
-        var currentColumn = 0;
-        var path = [[currentRow, currentColumn]];
-        maze[currentRow][currentColumn].visited = true;
-        maze[currentRow][currentColumn].solution = true;
+        var currentCoordinates = [0, 0];
+        var path = [];
+        PathFinder.moveTo(currentCoordinates, maze, path);
 
-        while (!(currentRow === maze.length - 1 && currentColumn === maze.length - 1)) {
-            var availableDirections = maze[currentRow][currentColumn].open;
-            var randomDirection = PathFinder.randomDirection(availableDirections, currentRow, currentColumn, maze);
+        while (!(currentCoordinates[0] === maze.length - 1 && currentCoordinates[1] === maze.length - 1)) {
+            var availableDirections = PathFinder.cell(maze, currentCoordinates).open;
+            var randomDirection = PathFinder.randomDirection(currentCoordinates, availableDirections, maze);
             if (randomDirection) {
-                var neighbourCell = PathFinder.neighbour([currentRow, currentColumn], randomDirection);
-                PathFinder.moveTo(neighbourCell[0], neighbourCell[1], maze, path);
+                var neighbourCoordinates = PathFinder.neighbour(currentCoordinates, randomDirection);
+                PathFinder.moveTo(neighbourCoordinates, maze, path);
+                currentCoordinates = neighbourCoordinates;
             } else {
-                deadEnd = true;
-                var fork = PathFinder.backToFork(path, maze);
-                currentRow = fork[0];
-                currentColumn = fork[1];
+                currentCoordinates = PathFinder.backToFork(path, maze);
             }
         }
     }
