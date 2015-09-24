@@ -34,11 +34,9 @@
         },
         unexploredDirections: function (directions, currentRow, currentColumn, maze) {
             var unexploredDirections = [];
-            console.log('current cell', currentRow, currentColumn)
 
             for (var i = 0; i < directions.length; i++) {
                 if (!PathFinder.isVisited(PathFinder.neighbour(currentRow, currentColumn, directions[i]), maze)) {
-                    console.log('DIRECTION', directions[i])
                     unexploredDirections.push(directions[i]);
                 }
             }
@@ -95,7 +93,6 @@
                     maze[currentRow][currentColumn].solution = true;
                 } else {
                     deadEnd = true;
-                    console.log('deadend', currentRow, currentColumn);
                     var fork = PathFinder.backToFork(path, maze);
                     currentRow = fork[0];
                     currentColumn = fork[1];
