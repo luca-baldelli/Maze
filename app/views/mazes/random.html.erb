@@ -63,7 +63,6 @@
             maze[currentRow][currentColumn].solution = true;
             var deadEnd = false;
 
-//            while (!deadEnd) {
             while (!(currentRow === maze.length - 1 && currentColumn === maze.length - 1)) {
                 var availableDirections = maze[currentRow][currentColumn].open;
                 var randomDirection = PathFinder.randomDirection(availableDirections, currentRow, currentColumn, maze);
