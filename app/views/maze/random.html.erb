@@ -6,50 +6,107 @@
         }
     };
     var PathFinder = {
-        neighbour: function (maze, row, column, direction) {
-            if (direction === 'up') {
-                newRow -= 1;
-                return maze[row-1][column];
-            } else if (direction === 'down') {
-                return maze[row-1][column];
-            } else if (direction === 'left') {
-                return maze[row][column-1];
-            } else if (direction === 'right') {
-                return maze[row][column-1];
+        isVisited: function (cell, maze) {
+            if (cell[0] < 0 || cell[0] >= maze.length || cell[1] < 0 || cell[1] >= maze.length) {
+                return true;
             }
+//            for (var i = 0; i < path.length; i++) {
+//                if (cell[0] == path[i][0] && cell[1] == path[i][1]) {
+//                    return true;
+//                }
+//            }
+            return maze[cell[0]][cell[1]].visited === true;
         },
-        randomDirection: function (maze, row, column, solution) {
-            var availableDirections = [];
-            var cell = maze[row][column];
-            $(cell.open).each(function(direction) {
-                if (!$.inArray(solution, PathFinder.neighbour(maze, row, column, direction))) {
-                    availableDirections.push(direction);
-                }
-            });
-            console.log(availableDirections)
-            return availableDirections[Math.floor(Math.random() * availableDirections.length)];
-        },
-        solution: function (maze) {
-            var currentRow = 0;
-            var currentColumn = 0;
-            var currentCell = maze[currentRow][currentColumn];
-            var solution = [currentCell];
-            while (currentCell !== maze[maze.length - 1][maze.length - 1]) {
-                var randomDirection = PathFinder.randomDirection(maze, currentRow, currentColumn, solution);
-                if (randomDirection) {
-                    currentCell = PathFinder.neighbour(maze, currentRow, currentColumn, randomDirection);
-                } else {
-                    solution.pop();
-                    currentCell = solution.pop();
-                    console.log('deadend')
-                }
-                solution.push(currentCell);
+        neighbour: function (currentRow, currentColumn, direction) {
+            var row = currentRow;
+            var column = currentColumn;
+            if (direction === 'up') {
+                column -= 1;
+            } else if (direction === 'down') {
+                column += 1;
+            } else if (direction === 'left') {
+                row -= 1;
+            } else if (direction === 'right') {
+                row += 1;
             }
 
-            return solution;
+            return [row, column];
         },
-        isSolution: function (maze, cell) {
-            return PathFinder.solution(maze).contains(cell);
+        unexploredDirections: function (directions, currentRow, currentColumn, maze) {
+            var unexploredDirections = [];
+            console.log('current cell', currentRow, currentColumn)
+
+            for (var i = 0; i < directions.length; i++) {
+                if (!PathFinder.isVisited(PathFinder.neighbour(currentRow, currentColumn, directions[i]), maze)) {
+                    console.log('DIRECTION', directions[i])
+                    unexploredDirections.push(directions[i]);
+                }
+            }
+
+            return unexploredDirections;
+        },
+        randomDirection: function (availableDirections, currentRow, currentColumn, maze) {
+            var unexploredDirections = PathFinder.unexploredDirections(availableDirections, currentRow, currentColumn, maze);
+            return unexploredDirections[Math.floor(Math.random() * unexploredDirections.length)];
+        },
+        backToFork: function (path, maze) {
+            var i;
+            for (i = path.length - 1; i >= 0; i--) {
+                if (PathFinder.unexploredDirections(['up', 'down', 'left', 'right'], path[i][0], path[i][1], maze).length > 0) {
+                    break;
+                } else {
+                    maze[path[i][0]][path[i][1]].solution = false;
+                }
+            }
+            path.slice(0, i + 1);
+            return [path[i][0], path[i][1]];
+        },
+        findPath: function (maze) {
+            var currentRow = 0;
+            var currentColumn = 0;
+            var path = [[currentRow, currentColumn]];
+            maze[currentRow][currentColumn].visited = true;
+            maze[currentRow][currentColumn].solution = true;
+            var deadEnd = false;
+
+//            while (!deadEnd) {
+            while (!(currentRow === maze.length - 1 && currentColumn === maze.length - 1)) {
+                var availableDirections = maze[currentRow][currentColumn].open;
+                var randomDirection = PathFinder.randomDirection(availableDirections, currentRow, currentColumn, maze);
+                if (randomDirection === 'up') {
+                    currentColumn -= 1;
+                    path.push([currentRow, currentColumn]);
+                    maze[currentRow][currentColumn].visited = true;
+                    maze[currentRow][currentColumn].solution = true;
+                } else if (randomDirection === 'down') {
+                    currentColumn += 1;
+                    path.push([currentRow, currentColumn]);
+                    maze[currentRow][currentColumn].visited = true;
+                    maze[currentRow][currentColumn].solution = true;
+                } else if (randomDirection === 'left') {
+                    currentRow -= 1;
+                    path.push([currentRow, currentColumn]);
+                    maze[currentRow][currentColumn].visited = true;
+                    maze[currentRow][currentColumn].solution = true;
+                } else if (randomDirection === 'right') {
+                    currentRow += 1;
+                    path.push([currentRow, currentColumn]);
+                    maze[currentRow][currentColumn].visited = true;
+                    maze[currentRow][currentColumn].solution = true;
+                } else {
+                    deadEnd = true;
+                    console.log('deadend', currentRow, currentColumn);
+                    var fork = PathFinder.backToFork(path, maze);
+                    currentRow = fork[0];
+                    currentColumn = fork[1];
+                }
+
+            }
+//            for (var i = 0; i < maze.length; i++) {
+//                for (var j = 0; j < maze[i].length; j++) {
+//                    maze[i][j].solution = true;
+//                }
+//            }
         }
     };
 
@@ -58,21 +115,24 @@
             var maze = Maze.random();
             return {
                 maze: maze,
-                isSolution: function (maze, cell) {
-                    return true;
+                findPath: function () {
+
                 }
             }
         },
 
         //view
         view: function (ctrl) {
+            var maze = ctrl.maze();
+            PathFinder.findPath(maze);
+
             return m("div.maze", [
                 ctrl.maze().map(function (column) {
                     return m(".column", [
                         column.map(function (cell) {
                             var wallClasses = cell.wall.join(' ');
-//                            var solutionClass = PathFinder.isSolution(ctrl.maze(), cell) ? 'solution' : '';
-                            return m("div", {class: 'wall ' + wallClasses});
+                            var solutionClass = cell.solution ? 'solution' : '';
+                            return m("div", {class: 'wall ' + wallClasses + ' ' + solutionClass});
                         })
                     ]);
                 })

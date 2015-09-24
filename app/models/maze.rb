@@ -31,8 +31,8 @@ class Maze
   private
 
   def setup_boundaries
-    @cells[0, 0].set(wall: [:up], open: [:left])
-    @cells[size-1, size-1].set(wall: [:down], open: [:right])
+    @cells[0, 0].set(wall: [:up, :left])
+    @cells[size-1, size-1].set(wall: [:down, :right])
     @cells[size-1, 0].set(wall: [:up, :right])
     @cells[0, size-1].set(wall: [:down, :left])
 
