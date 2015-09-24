@@ -13,4 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require mithril.min
+//= require pathFinder
 //= require_tree .
