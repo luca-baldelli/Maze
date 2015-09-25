@@ -18,10 +18,12 @@ var MazeApp = {
             pathFound: pathFound,
             generate: function (size) {
                 loading(true);
+                m.redraw(true);
                 Maze.random(size).then(function (response) {
                     maze(response);
                     loading(false);
                     pathFound(false);
+                    m.redraw(true);
                 });
             },
             findPath: function () {
