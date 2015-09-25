@@ -6,6 +6,8 @@ class PathBuilder
       right: :left
   }
 
+  attr_reader :cells, :path
+
   def initialize maze
     @maze = maze
     @cells = maze.cells
