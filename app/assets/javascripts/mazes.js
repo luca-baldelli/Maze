@@ -27,7 +27,7 @@ var MazeApp = {
                 });
             },
             findPath: function () {
-                PathFinder.findPath(maze());
+                new PathFinder(maze()).findPath();
                 pathFound(true);
             }
         }

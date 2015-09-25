@@ -1,34 +1,35 @@
-var PathFinder = {
-    findPath: function (maze) {
+var PathFinder = function (maze) {
+    var path = [];
+
+    this.findPath = function () {
         var currentCoordinates = [0, 0];
-        var path = [];
-        PathFinder.moveTo(currentCoordinates, maze, path);
+        this.moveTo(currentCoordinates, path);
 
         while (!(currentCoordinates[0] === maze.length - 1 && currentCoordinates[1] === maze.length - 1)) {
-            var availableDirections = PathFinder.cell(maze, currentCoordinates).open;
-            var randomDirection = PathFinder.randomDirection(currentCoordinates, availableDirections, maze);
+            var availableDirections = this.cell(currentCoordinates).open;
+            var randomDirection = this.randomDirection(currentCoordinates, availableDirections);
             if (randomDirection) {
-                var neighbourCoordinates = PathFinder.neighbour(currentCoordinates, randomDirection);
-                PathFinder.moveTo(neighbourCoordinates, maze, path);
+                var neighbourCoordinates = this.neighbour(currentCoordinates, randomDirection);
+                this.moveTo(neighbourCoordinates);
                 currentCoordinates = neighbourCoordinates;
             } else {
-                currentCoordinates = PathFinder.backToFork(path, maze);
+                currentCoordinates = this.backToFork();
             }
         }
-    },
-    moveTo: function (coordinates, maze, path) {
+    };
+    this.moveTo = function (coordinates) {
         path.push(coordinates);
-        PathFinder.cell(maze, coordinates).visited = true;
-        PathFinder.cell(maze, coordinates).solution = true;
-    },
-    cell: function (maze, coordinates) {
+        this.cell(coordinates).visited = true;
+        this.cell(coordinates).solution = true;
+    };
+    this.cell = function (coordinates) {
         return maze[coordinates[0]][coordinates[1]];
-    },
-    randomDirection: function (coordinates, availableDirections, maze) {
-        var unexploredDirections = PathFinder.unexploredDirections(availableDirections, coordinates, maze);
+    };
+    this.randomDirection = function (coordinates, availableDirections) {
+        var unexploredDirections = this.unexploredDirections(availableDirections, coordinates);
         return unexploredDirections[Math.floor(Math.random() * unexploredDirections.length)];
-    },
-    neighbour: function (coordinates, direction) {
+    };
+    this.neighbour = function (coordinates, direction) {
         var row = coordinates[0];
         var column = coordinates[1];
         if (direction === 'up') {
@@ -42,31 +43,31 @@ var PathFinder = {
         }
 
         return [row, column];
-    },
-    isVisited: function (coordinates, maze) {
+    };
+    this.isVisited = function (coordinates) {
         if (coordinates[0] < 0 || coordinates[0] >= maze.length || coordinates[1] < 0 || coordinates[1] >= maze.length) {
             return true;
         }
-        return PathFinder.cell(maze, coordinates).visited === true;
-    },
-    unexploredDirections: function (directions, coordinates, maze) {
+        return this.cell(coordinates).visited === true;
+    };
+    this.unexploredDirections = function (directions, coordinates) {
         var unexploredDirections = [];
 
         for (var i = 0; i < directions.length; i++) {
-            if (!PathFinder.isVisited(PathFinder.neighbour(coordinates, directions[i]), maze)) {
+            if (!this.isVisited(this.neighbour(coordinates, directions[i]))) {
                 unexploredDirections.push(directions[i]);
             }
         }
 
         return unexploredDirections;
-    },
-    backToFork: function (path, maze) {
+    };
+    this.backToFork = function () {
         var i;
         for (i = path.length - 1; i >= 0; i--) {
-            if (PathFinder.unexploredDirections(['up', 'down', 'left', 'right'], path[i], maze).length > 0) {
+            if (this.unexploredDirections(['up', 'down', 'left', 'right'], path[i]).length > 0) {
                 break;
             } else {
-                PathFinder.cell(maze, path[i]).solution = false;
+                this.cell(path[i]).solution = false;
             }
         }
         path.slice(0, i + 1);
