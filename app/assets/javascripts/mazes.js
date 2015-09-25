@@ -18,12 +18,10 @@ var MazeApp = {
             pathFound: pathFound,
             generate: function (size) {
                 loading(true);
-                m.redraw(true);
                 Maze.random(size).then(function (response) {
                     maze(response);
                     loading(false);
                     pathFound(false);
-                    m.redraw(true);
                 });
             },
             findPath: function () {
@@ -41,9 +39,9 @@ var MazeApp = {
         return m("div", [
             m("input", {onchange: m.withAttr("value", mazeSize), value: mazeSize()}),
             m("button", {onclick: ctrl.generate.bind(ctrl, mazeSize())}, "Generate"),
-            m("button", {onclick: ctrl.findPath, class: pathFound() ? 'hidden' : ''}, "Find Path"),
+            m("button", {onclick: ctrl.findPath, className: pathFound() ? 'hidden' : ''}, "Find Path"),
             m("span", loading() ? 'loading' : ''),
-            m("div.maze", {class: loading() ? 'hidden' : ''}, [
+            m("div.maze", {className: loading() ? 'hidden' : ''}, [
                 maze().map(function (column) {
                     return m(".column", [
                         column.map(function (cell) {
@@ -52,7 +50,7 @@ var MazeApp = {
                             var startClass = cell.start ? 'start' : '';
                             var endClass = cell.end ? 'end' : '';
                             return m("div", {
-                                class: 'wall ' +
+                                className: 'wall ' +
                                 wallClasses + ' ' +
                                 solutionClass + ' ' +
                                 startClass + ' ' +
